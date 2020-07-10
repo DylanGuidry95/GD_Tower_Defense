@@ -1,0 +1,10 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Art/basictiles.png" type="Texture" id=1]
+
+[node name="Stone_Tile_2" type="Sprite" groups=[
+"cell",
+]]
+texture = ExtResource( 1 )
+region_enabled = true
+region_rect = Rect2( 17, 0, 14, 16 )
