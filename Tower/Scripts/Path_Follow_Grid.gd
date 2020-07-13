@@ -1,5 +1,7 @@
 extends Node2D
 
+signal environment_changed
+
 export var height = 25
 export var width = 50
 
@@ -16,6 +18,8 @@ var tiles = []
 
 var start_node
 var end_node
+
+var valid_path
 
 class MyCustomSorter:
 	static func sort_ascending(a, b):
@@ -95,27 +99,18 @@ func _ready():
 		if s.position.distance_to(c.position) <= no_place_radius:
 			tiles[cells.find(c)].interactable = false
 		if e.position.distance_to(c.position) <= no_place_radius:
-			tiles[cells.find(c)].interactable = false
-	
-func _process(delta):
-	if Input.is_action_just_pressed("run_sim"):
-		if start_node != null && end_node != null:	
-			for t in tiles:
-				t.path = false
-			reset()
-			var path = find_path(cells[tiles.find(start_node)], cells[tiles.find(end_node)])
-			for p in path:
-				tiles[cells.find(p)].path = true
+			tiles[cells.find(c)].interactable = false	
 
-func find_path(start, goal):
+func find_path():
+	reset()
 	var openList = []
 	var closedList = []	
 	var currentNode
-	currentNode = start
+	currentNode = cells[tiles.find(start_node)]
 	openList.append(currentNode)
-	while !closedList.has(goal) && openList.size() != 0:
+	while !closedList.has(cells[tiles.find(end_node)]) && openList.size() != 0:
 		currentNode = openList[0]
-		if currentNode.position == goal.position:
+		if currentNode.position == cells[tiles.find(end_node)].position:
 			break
 		openList.remove(0)
 		closedList.append(currentNode)
@@ -124,20 +119,22 @@ func find_path(start, goal):
 			if closedList.has(n):
 				continue
 			if !openList.has(n):
-				n.calc_h_score(goal)
+				n.calc_h_score(cells[tiles.find(end_node)])
 				n.calc_f_score()
 				openList.append(n)		
 		openList.sort_custom(MyCustomSorter, "sort_ascending")
 	
-	var n = goal
+	var n = cells[tiles.find(end_node)]
 	var path = []
 	while n != null:
 		path.append(n)
 		n = n.parent
-	return path
+	valid_path = path
 		
 func get_navigation(cell):
-	return find_path(cell, end_node)
+	for c in cells:
+		if c.position == cell.position:
+			return cells.find(c)
 		
 func sort_open_list(list):
 	for cell in list:
@@ -166,8 +163,7 @@ func get_neighbors(node, closed_list):
 				neighbors.append(c)
 				node.neighbors.append(c)
 				c.calc_g_score(node)
-				break
-	
+				break	
 	return neighbors
 
 func reset():
@@ -175,11 +171,13 @@ func reset():
 		c.parent = null
 
 func tile_clicked(tile, state):
-	var index = tiles.find(tile)
-	var recalc = false
-	if index != -1:
-		if state == "traversable":
-			for t in tiles:
-				t.path = false
-			cells[index].traversable = !cells[index].traversable
-			tile.traversable = !tile.traversable
+	var m = get_parent()
+	if !m.is_round_running:
+		var index = tiles.find(tile)
+		var recalc = false
+		if index != -1:
+			if state == "traversable":
+				for t in tiles:
+					t.path = false
+				cells[index].traversable = !cells[index].traversable
+				tile.traversable = !tile.traversable
