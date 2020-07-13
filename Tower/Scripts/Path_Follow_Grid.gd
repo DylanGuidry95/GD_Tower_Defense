@@ -9,6 +9,7 @@ export var no_place_radius = 3
 export var min_objective_distance = 7;
 
 export (PackedScene) var tile
+export (PackedScene) var turret
 
 var random = RandomNumberGenerator.new()
 
@@ -179,5 +180,8 @@ func tile_clicked(tile, state):
 			if state == "traversable":
 				for t in tiles:
 					t.path = false
-				cells[index].traversable = !cells[index].traversable
-				tile.traversable = !tile.traversable
+				cells[index].traversable = false
+				tile.traversable = false
+				var t = turret.instance()
+				get_parent().add_child(t)
+				t.position = tile.position
