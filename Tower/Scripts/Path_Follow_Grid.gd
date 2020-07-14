@@ -7,9 +7,13 @@ export var width = 50
 
 export var no_place_radius = 3
 export var min_objective_distance = 7;
+export var height_mod = 5
 
 export (PackedScene) var tile
+export (PackedScene) var mountain
+export (PackedScene) var water
 export (PackedScene) var turret
+export (PackedScene) var harvester
 
 var random = RandomNumberGenerator.new()
 
@@ -30,6 +34,7 @@ class MyCustomSorter:
 
 class Cell:
 	var position
+	var height
 	var traversable = true
 	var h_score = 0
 	var g_score = 0
@@ -62,7 +67,7 @@ class Cell:
 				g_score = parent.g_score + g
 				
 	func calc_h_score(destination):
-		h_score = 10 * (abs(destination.position.x - position.x) + 
+		h_score = (10 + height) * (abs(destination.position.x - position.x) + 
 						abs(destination.position.y - position.y))
 						
 	func calc_f_score():
@@ -70,6 +75,11 @@ class Cell:
 
 func _ready():
 	random.randomize()
+	var noise = OpenSimplexNoise.new()
+	noise.seed = random.randi()
+	noise.octaves = 3
+	noise.period = 20
+	noise.persistence = 0.8	
 	width = int((OS.window_size.x - (OS.window_size.x * .10)) / 18) 
 	height = int((OS.window_size.y - (OS.window_size.y * .10)) / 18)
 	for i in range(0, height):
@@ -77,19 +87,33 @@ func _ready():
 			var newCell = Cell.new()
 			newCell.position = Vector2(j,i)
 			cells.append(newCell)
-	for c in cells:
-		var newTile = tile.instance()
+
+	for c in cells:		
+		var pos = c.position * Vector2(16,16)
+		c.height = noise.get_noise_2dv(pos) * height_mod
+		var newTile
+		if c.height > 1.5:
+			newTile = mountain.instance()
+		elif c.height < -1:
+			newTile = water.instance()
+			c.traversable = false
+			newTile.traversable = false
+		else:
+			newTile = tile.instance()
 		tiles.append(newTile)	
 		add_child(newTile)		
-		newTile.position = c.position * Vector2(18,18) + newTile.position
+		newTile.position = pos + newTile.position
 		newTile.connect("tile_interacted", self, "tile_clicked")
 		
 	start_node = tiles[random.randi_range(0, tiles.size() / 2)]
-	start_node.is_start = true
-	end_node = tiles[random.randi_range(tiles.size() / 2, tiles.size() - 1)]
 	var start = cells[tiles.find(start_node)]
+	while !start.traversable:
+		start_node = tiles[random.randi_range(0, tiles.size() / 2)]
+		start = cells[tiles.find(start_node)]
+	start_node.is_start = true
+	end_node = tiles[random.randi_range(tiles.size() / 2, tiles.size() - 1)]	
 	var end = cells[tiles.find(end_node)] 
-	while start.position.distance_to(end.position) < min_objective_distance:
+	while start.position.distance_to(end.position) < min_objective_distance && !end.traversable:
 		end_node = tiles[random.randi_range(tiles.size() / 2, tiles.size() - 1)]
 		end = cells[tiles.find(end_node)]
 	end_node.is_goal = true
@@ -185,3 +209,9 @@ func tile_clicked(tile, state):
 				var t = turret.instance()
 				get_parent().add_child(t)
 				t.position = tile.position
+			if state == "harvest":
+				for t in tiles:
+					t.path = false
+				var h = harvester.instance()
+				get_parent().add_child(h)
+				h.position = tile.position

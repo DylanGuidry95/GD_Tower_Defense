@@ -18,18 +18,19 @@ func connect_to_path(p_behaviour):
 func smooth_path():
 	var smoothed_path = []
 	var previous_direction = Vector2(0,0)
-	var next_direction = Vector2(0,0)
+	var next_direction = Vector2(0,0)	
 	for p in range(0, path.size() - 1):
 		next_direction = path[p - 1].position - path[p].position
 		if next_direction != previous_direction:
 			smoothed_path.append(path[p - 1])
+			smoothed_path.append(path[p])			
 			previous_direction = next_direction
 	smoothed_path.pop_front()
 	path = smoothed_path
 
 func _process(delta):	
 	if path.size() == 0 || path_behaviour == null || current_index < 0:
-		return
+		return	
 	timer += delta
 	var travel_pos = path_behaviour.tiles[path_behaviour.get_navigation(path[current_index])].position
 	look_at(travel_pos)
@@ -40,4 +41,5 @@ func _process(delta):
 		current_index -= 1
 		if current_index < 0:
 			emit_signal("goal_reached")
-		timer = 0		
+			queue_free()
+		timer = 0
