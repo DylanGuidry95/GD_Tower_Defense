@@ -18,17 +18,12 @@ func _ready():
 func _draw():		
 	var p = get_parent()
 	var h = p.cells[p.tiles.find(self)].height
-	if !traversable:
-		draw_circle(Vector2(0,0), 5, Color.black)
 	if path:
 		draw_circle(Vector2(0,0), 7, Color.yellow)
 	if is_start:
 		draw_circle(Vector2(0,0), 8, Color.blue)
 	if is_goal:
 		draw_circle(Vector2(0,0), 8, Color.gray)
-	if !interactable:
-		draw_circle(Vector2(0,0), 3, Color.red)
-	draw_circle(Vector2(0,0),8.5, Color(h,h,h, 0.1))
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):

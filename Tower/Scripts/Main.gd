@@ -25,7 +25,7 @@ func _on_SpawnTimer_timeout():
 		is_round_running = false
 
 func _process(delta):
-	if Input.is_action_just_pressed("show path") && !is_round_running:
+	if Input.is_action_just_pressed("show path") && !is_round_running:		
 		$Path.find_path()
 		for c in $Path.valid_path:
 			$Path.tiles[$Path.cells.find(c)].path = true
@@ -35,7 +35,7 @@ func take_damage():
 	print(health)
 
 func _on_HUD_round_start_pressed():
-	is_round_running = true
+	is_round_running = true	
 	$Path.find_path()
 	num_spawns = 0
 	current_round += 1

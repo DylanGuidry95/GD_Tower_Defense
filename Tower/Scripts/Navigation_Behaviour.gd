@@ -11,22 +11,8 @@ export var movement_speed = 25
 func connect_to_path(p_behaviour):
 	environment = []	
 	path_behaviour = p_behaviour
-	path = path_behaviour.valid_path	
-	smooth_path()
+	path = path_behaviour.valid_path		
 	current_index = path.size() - 1
-
-func smooth_path():
-	var smoothed_path = []
-	var previous_direction = Vector2(0,0)
-	var next_direction = Vector2(0,0)	
-	for p in range(0, path.size() - 1):
-		next_direction = path[p - 1].position - path[p].position
-		if next_direction != previous_direction:
-			smoothed_path.append(path[p - 1])
-			smoothed_path.append(path[p])			
-			previous_direction = next_direction
-	smoothed_path.pop_front()
-	path = smoothed_path
 
 func _process(delta):	
 	if path.size() == 0 || path_behaviour == null || current_index < 0:
@@ -43,3 +29,8 @@ func _process(delta):
 			emit_signal("goal_reached")
 			queue_free()
 		timer = 0
+
+
+func _on_Area2D_body_entered(body):
+	queue_free()
+	body.queue_free()

@@ -1,7 +1,5 @@
 extends Node2D
 
-signal environment_changed
-
 export var height = 25
 export var width = 50
 
@@ -41,6 +39,14 @@ class Cell:
 	var f_score = 0
 	var neighbors = []
 	var parent = null
+	var child = null
+	
+	func reset():
+		g_score = 0
+		h_score = 0
+		f_score = 0
+		neighbors = [null, null]
+		parent = null
 	
 	func calc_g_score(from):
 		var g = 0
@@ -65,11 +71,12 @@ class Cell:
 			if g_score > from.g_score + g:
 				parent = from
 				g_score = parent.g_score + g
+		parent.child = self	
 				
 	func calc_h_score(destination):
 		h_score = (10 + height) * (abs(destination.position.x - position.x) + 
 						abs(destination.position.y - position.y))
-						
+
 	func calc_f_score():
 		f_score = g_score + h_score
 
@@ -113,7 +120,7 @@ func _ready():
 	start_node.is_start = true
 	end_node = tiles[random.randi_range(tiles.size() / 2, tiles.size() - 1)]	
 	var end = cells[tiles.find(end_node)] 
-	while start.position.distance_to(end.position) < min_objective_distance && !end.traversable:
+	while start.position.distance_to(end.position) < min_objective_distance || !end.traversable:
 		end_node = tiles[random.randi_range(tiles.size() / 2, tiles.size() - 1)]
 		end = cells[tiles.find(end_node)]
 	end_node.is_goal = true
@@ -133,7 +140,11 @@ func find_path():
 	var currentNode
 	currentNode = cells[tiles.find(start_node)]
 	openList.append(currentNode)
+	
+	var iter = 0
+	
 	while !closedList.has(cells[tiles.find(end_node)]) && openList.size() != 0:
+		iter += 1
 		currentNode = openList[0]
 		if currentNode.position == cells[tiles.find(end_node)].position:
 			break
@@ -149,13 +160,15 @@ func find_path():
 				openList.append(n)		
 		openList.sort_custom(MyCustomSorter, "sort_ascending")
 	
+	if openList.size() == 0:
+		print("NO PATH")
 	var n = cells[tiles.find(end_node)]
 	var path = []
 	while n != null:
 		path.append(n)
 		n = n.parent
 	valid_path = path
-		
+	
 func get_navigation(cell):
 	for c in cells:
 		if c.position == cell.position:
@@ -193,25 +206,43 @@ func get_neighbors(node, closed_list):
 
 func reset():
 	for c in cells:
-		c.parent = null
+		c.reset()
 
-func tile_clicked(tile, state):
+func tile_clicked(i_tile, state):
 	var m = get_parent()
 	if !m.is_round_running:
-		var index = tiles.find(tile)
+		var index = tiles.find(i_tile)
 		var recalc = false
 		if index != -1:
 			if state == "traversable":
 				for t in tiles:
 					t.path = false
 				cells[index].traversable = false
-				tile.traversable = false
+				i_tile.traversable = false
 				var t = turret.instance()
 				get_parent().add_child(t)
-				t.position = tile.position
+				t.position = i_tile.position
 			if state == "harvest":
 				for t in tiles:
 					t.path = false
 				var h = harvester.instance()
 				get_parent().add_child(h)
-				h.position = tile.position
+				h.position = i_tile.position
+
+func _process(delta):
+	update()
+
+func _draw():
+	draw_circle_arc(start_node.position, no_place_radius * 16, 0, 360, Color.black)
+	draw_circle_arc(end_node.position, no_place_radius * 16, 0, 360, Color.black)
+	
+func draw_circle_arc(center, radius, angle_from, angle_to, color):
+	var nb_points = 32
+	var points_arc = PoolVector2Array()
+
+	for i in range(nb_points + 1):
+		var angle_point = deg2rad(angle_from + i * (angle_to-angle_from) / nb_points - 90)
+		points_arc.push_back(center + Vector2(cos(angle_point), sin(angle_point)) * radius)
+
+	for index_point in range(nb_points):
+		draw_line(points_arc[index_point], points_arc[index_point + 1], color)
