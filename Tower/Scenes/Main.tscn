@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=13 format=2]
 
 [ext_resource path="res://Scripts/Main.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Grass_Tile_1.tscn" type="PackedScene" id=2]
@@ -9,10 +9,16 @@
 [ext_resource path="res://Scenes/mountain_tile_1.tscn" type="PackedScene" id=7]
 [ext_resource path="res://Scenes/Harvester.tscn" type="PackedScene" id=8]
 [ext_resource path="res://Scenes/water_tile_1.tscn" type="PackedScene" id=9]
+[ext_resource path="res://Scenes/Spawner.tscn" type="PackedScene" id=10]
+[ext_resource path="res://Scenes/Goal.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Scenes/Path.tscn" type="PackedScene" id=12]
 
 [node name="Main" type="Node2D"]
 script = ExtResource( 1 )
 agent = ExtResource( 3 )
+path_visual = ExtResource( 12 )
+spawner_visual = ExtResource( 10 )
+goal_visual = ExtResource( 11 )
 rounds = [ 5, 10, 15 ]
 
 [node name="Path" type="Node2D" parent="."]

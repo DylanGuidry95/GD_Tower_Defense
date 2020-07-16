@@ -15,19 +15,8 @@ func _ready():
 	traversable = !has_resource
 	pass # Replace with function body.
 
-func _draw():		
-	var p = get_parent()
-	var h = p.cells[p.tiles.find(self)].height
-	if path:
-		draw_circle(Vector2(0,0), 7, Color.yellow)
-	if is_start:
-		draw_circle(Vector2(0,0), 8, Color.blue)
-	if is_goal:
-		draw_circle(Vector2(0,0), 8, Color.gray)
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta):
-	update()
 	if hoovered && interactable && !is_start && !is_goal:
 		if Input.is_action_just_pressed("place_turret") && !has_resource:
 			emit_signal("tile_interacted", self, "traversable")

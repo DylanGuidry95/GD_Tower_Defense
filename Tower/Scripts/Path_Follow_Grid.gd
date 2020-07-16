@@ -96,7 +96,7 @@ func _ready():
 			cells.append(newCell)
 
 	for c in cells:		
-		var pos = c.position * Vector2(16,16)
+		var pos = c.position * Vector2(18,18)
 		c.height = noise.get_noise_2dv(pos) * height_mod
 		var newTile
 		if c.height > 1.5:
@@ -111,6 +111,9 @@ func _ready():
 		add_child(newTile)		
 		newTile.position = pos + newTile.position
 		newTile.connect("tile_interacted", self, "tile_clicked")
+		var h = c.height
+		var mat = newTile.material
+		mat.set_shader_param("height", h)
 		
 	start_node = tiles[random.randi_range(0, tiles.size() / 2)]
 	var start = cells[tiles.find(start_node)]

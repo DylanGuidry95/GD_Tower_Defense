@@ -28,8 +28,6 @@ func _process(delta):
 		if current_index < 0:
 			emit_signal("goal_reached")
 			queue_free()
-		timer = 0
-
 
 func _on_Area2D_body_entered(body):
 	queue_free()

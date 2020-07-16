@@ -1,17 +1,29 @@
 extends Node2D
 export (PackedScene) var agent
+export (PackedScene) var path_visual
+export (PackedScene) var spawner_visual
+export (PackedScene) var goal_visual
 
 var is_round_running
 export var rounds = []
 var num_spawns = 0
 var current_round = 0
+var spawner
+var goal
+var paths = []
 
 export var health = 1
 
 # Called when the node enters the scene tree for the first time.
 func _ready():
-	is_round_running = false	
-	pass # Replace with function body.
+	is_round_running = false
+	var algo = $Path
+	spawner = spawner_visual.instance()
+	add_child(spawner)
+	spawner.position = algo.start_node.position			
+	goal = goal_visual.instance()
+	add_child(goal)
+	goal.position = algo.end_node.position
 
 func _on_SpawnTimer_timeout():
 	if is_round_running:	
@@ -25,10 +37,20 @@ func _on_SpawnTimer_timeout():
 		is_round_running = false
 
 func _process(delta):
+	update()
 	if Input.is_action_just_pressed("show path") && !is_round_running:		
 		$Path.find_path()
-		for c in $Path.valid_path:
-			$Path.tiles[$Path.cells.find(c)].path = true
+
+func _draw():
+	var path = $Path.valid_path
+	if path != null:
+		if path.size() != 0:
+			var iter = 0
+			for tile in path:
+				if iter == path.size() - 1:
+					break
+				draw_line($Path.tiles[tile, path[iter + 1].position, Color.black)
+				iter += 1
 
 func take_damage():
 	health -= 1
