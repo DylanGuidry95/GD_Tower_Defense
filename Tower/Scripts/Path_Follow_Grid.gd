@@ -12,6 +12,8 @@ export (PackedScene) var mountain
 export (PackedScene) var water
 export (PackedScene) var turret
 export (PackedScene) var harvester
+export (PackedScene) var wood
+export (PackedScene) var stone
 
 var random = RandomNumberGenerator.new()
 
@@ -96,7 +98,7 @@ func _ready():
 			cells.append(newCell)
 
 	for c in cells:		
-		var pos = c.position * Vector2(18,18)
+		var pos = c.position * Vector2(16,16)
 		c.height = noise.get_noise_2dv(pos) * height_mod
 		var newTile
 		if c.height > 1.5:
@@ -113,7 +115,6 @@ func _ready():
 		newTile.connect("tile_interacted", self, "tile_clicked")
 		var h = c.height
 		var mat = newTile.material
-		mat.set_shader_param("height", h)
 		
 	start_node = tiles[random.randi_range(0, tiles.size() / 2)]
 	var start = cells[tiles.find(start_node)]
@@ -135,6 +136,33 @@ func _ready():
 			tiles[cells.find(c)].interactable = false
 		if e.position.distance_to(c.position) <= no_place_radius:
 			tiles[cells.find(c)].interactable = false	
+	place_resources(3, 3)
+
+func place_resources(num_wood, num_stone):
+	for i in range(0, num_wood):
+		var index = random.randi_range(0, tiles.size() - 1)
+		var is_start_node = tiles[index].position == start_node.position
+		var is_end_node = tiles[index].position == end_node.position
+		var is_trav = tiles[index].traversable
+		while !is_trav:
+			index = random.randi_range(0, tiles.size() - 1)
+			is_trav = tiles[index].traversable
+		tiles[index].has_resource = true
+		var w = wood.instance()
+		add_child(w)
+		w.position = tiles[index].position
+	for i in range(0, num_stone):
+		var index = random.randi_range(0, tiles.size() - 1)
+		var is_start_node = tiles[index].position == start_node.position
+		var is_end_node = tiles[index].position == end_node.position
+		var is_not_trav = !tiles[index].traversable
+		while is_not_trav:
+			index = random.randi_range(0, tiles.size() - 1)
+			is_not_trav = tiles[index].traversable
+		tiles[index].has_resource = true
+		var s = stone.instance()
+		add_child(s)
+		s.position = tiles[index].position
 
 func find_path():
 	reset()
@@ -171,6 +199,7 @@ func find_path():
 		path.append(n)
 		n = n.parent
 	valid_path = path
+	update()
 	
 func get_navigation(cell):
 	for c in cells:
@@ -213,6 +242,7 @@ func reset():
 
 func tile_clicked(i_tile, state):
 	var m = get_parent()
+	valid_path = []
 	if !m.is_round_running:
 		var index = tiles.find(i_tile)
 		var recalc = false
@@ -231,13 +261,21 @@ func tile_clicked(i_tile, state):
 				var h = harvester.instance()
 				get_parent().add_child(h)
 				h.position = i_tile.position
-
-func _process(delta):
-	update()
+		update()
 
 func _draw():
 	draw_circle_arc(start_node.position, no_place_radius * 16, 0, 360, Color.black)
-	draw_circle_arc(end_node.position, no_place_radius * 16, 0, 360, Color.black)
+	draw_circle_arc(end_node.position, no_place_radius * 16, 0, 360, Color.black)	
+	var path = valid_path
+	if path != null:
+		if path.size() != 0:
+			var iter = 0
+			for tile in path:
+				if iter == path.size() - 1:
+					break
+				draw_line(tiles[get_navigation(path[iter])].position, tiles[get_navigation(path[iter + 1])].position, Color.black)
+				iter += 1
+	
 	
 func draw_circle_arc(center, radius, angle_from, angle_to, color):
 	var nb_points = 32

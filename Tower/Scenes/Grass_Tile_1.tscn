@@ -1,25 +1,19 @@
-[gd_scene load_steps=6 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Art/basictiles.png" type="Texture" id=1]
 [ext_resource path="res://Scripts/Tile_Behaviour.gd" type="Script" id=2]
-[ext_resource path="res://shader/terrain_tile.shader" type="Shader" id=3]
 
-[sub_resource type="ShaderMaterial" id=1]
-shader = ExtResource( 3 )
-shader_param/height = null
-
-[sub_resource type="RectangleShape2D" id=2]
+[sub_resource type="RectangleShape2D" id=1]
 extents = Vector2( 8.05476, 8.1465 )
 
 [node name="Grass_Tile_1" type="Sprite" groups=[
 "cell",
 ]]
-material = SubResource( 1 )
 position = Vector2( 8.5, 8 )
 z_index = -1
 texture = ExtResource( 1 )
 region_enabled = true
-region_rect = Rect2( 49, 16, 16, 16 )
+region_rect = Rect2( 0, 128, 16, 16 )
 script = ExtResource( 2 )
 
 [node name="Area2D" type="Area2D" parent="."]
@@ -29,6 +23,6 @@ collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Area2D"]
 visible = false
-shape = SubResource( 2 )
+shape = SubResource( 1 )
 [connection signal="mouse_entered" from="Area2D" to="." method="_on_Area2D_mouse_entered"]
 [connection signal="mouse_exited" from="Area2D" to="." method="_on_Area2D_mouse_exited"]

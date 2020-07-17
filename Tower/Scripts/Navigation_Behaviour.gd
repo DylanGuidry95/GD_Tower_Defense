@@ -7,6 +7,7 @@ var path_behaviour
 var environment
 var timer = 0
 export var movement_speed = 25
+export var health = 15
 
 func connect_to_path(p_behaviour):
 	environment = []	
@@ -30,5 +31,7 @@ func _process(delta):
 			queue_free()
 
 func _on_Area2D_body_entered(body):
-	queue_free()
+	health -= 1
+	if health <= 0:
+		queue_free()
 	body.queue_free()

@@ -9,7 +9,7 @@ extents = Vector2( 32, 32 )
 [node name="Agent" type="Sprite" groups=[
 "mob",
 ]]
-scale = Vector2( 0.25, 0.25 )
+scale = Vector2( 0.15, 0.15 )
 texture = ExtResource( 1 )
 script = ExtResource( 2 )
 

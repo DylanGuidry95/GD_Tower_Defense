@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://Scripts/Main.gd" type="Script" id=1]
 [ext_resource path="res://Scenes/Grass_Tile_1.tscn" type="PackedScene" id=2]
@@ -12,8 +12,11 @@
 [ext_resource path="res://Scenes/Spawner.tscn" type="PackedScene" id=10]
 [ext_resource path="res://Scenes/Goal.tscn" type="PackedScene" id=11]
 [ext_resource path="res://Scenes/Path.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Scenes/Stone_Resource_Tile.tscn" type="PackedScene" id=13]
+[ext_resource path="res://Scenes/Wood_Resource_Tile.tscn" type="PackedScene" id=14]
 
 [node name="Main" type="Node2D"]
+z_index = 500
 script = ExtResource( 1 )
 agent = ExtResource( 3 )
 path_visual = ExtResource( 12 )
@@ -29,9 +32,11 @@ mountain = ExtResource( 7 )
 water = ExtResource( 9 )
 turret = ExtResource( 6 )
 harvester = ExtResource( 8 )
+wood = ExtResource( 14 )
+stone = ExtResource( 13 )
 
 [node name="SpawnTimer" type="Timer" parent="."]
-wait_time = 3.0
+wait_time = 2.0
 autostart = true
 
 [node name="HUD" parent="." instance=ExtResource( 4 )]
