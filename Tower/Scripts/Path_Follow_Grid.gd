@@ -1,3 +1,4 @@
+tool
 extends Node2D
 
 export var height = 25
@@ -84,6 +85,14 @@ class Cell:
 
 func _ready():
 	random.randomize()
+	create_environment()
+
+func create_environment():
+	cells = []
+	valid_path = []
+	for t in tiles:
+		t.queue_free()
+	tiles = []
 	var noise = OpenSimplexNoise.new()
 	noise.seed = random.randi()
 	noise.octaves = 3
@@ -109,8 +118,9 @@ func _ready():
 			newTile.traversable = false
 		else:
 			newTile = tile.instance()
-		tiles.append(newTile)	
-		add_child(newTile)		
+		tiles.append(newTile)
+		add_child(newTile)	
+		newTile.visible = false
 		newTile.position = pos + newTile.position
 		newTile.connect("tile_interacted", self, "tile_clicked")
 		var h = c.height
@@ -136,7 +146,8 @@ func _ready():
 			tiles[cells.find(c)].interactable = false
 		if e.position.distance_to(c.position) <= no_place_radius:
 			tiles[cells.find(c)].interactable = false	
-	place_resources(3, 3)
+	#place_resources(3, 3)
+	update()
 
 func place_resources(num_wood, num_stone):
 	for i in range(0, num_wood):
@@ -151,6 +162,23 @@ func place_resources(num_wood, num_stone):
 		var w = wood.instance()
 		add_child(w)
 		w.position = tiles[index].position
+		w.tile = tiles[index]
+		var neighbors = get_neighbors(cells[index], [])
+		for n in neighbors:	
+			var nt = wood.instance()
+			nt = tiles[cells.find(n)]
+			add_child(nt)
+			nt.position = tiles[cells.find(n)].position
+			tiles[cells.find(n)].has_resource = true
+			if random.randi_range(0,100) <= 50:
+				var ne = get_neighbors(n, [])
+				for nei in ne:
+					if random.randi_range(0,100) <= 25:
+						var net = wood.instance()
+						net.tile = tiles[cells.find(nei)]
+						add_child(net)
+						net.position = tiles[cells.find(nei)].position
+						tiles[cells.find(nei)].has_resource = true
 	for i in range(0, num_stone):
 		var index = random.randi_range(0, tiles.size() - 1)
 		var is_start_node = tiles[index].position == start_node.position
@@ -163,6 +191,16 @@ func place_resources(num_wood, num_stone):
 		var s = stone.instance()
 		add_child(s)
 		s.position = tiles[index].position
+		s.tile = tiles[index]
+		var neighbors = get_neighbors(cells[index], [])
+		for n in neighbors:
+			if random.randi_range(0,100) <= 50:
+				var ns = stone.instance()
+				add_child(ns)
+				ns.position = tiles[cells.find(n)].position
+				tiles[cells.find(n)].has_resource = true
+				ns.tile = tiles[cells.find(n)]
+		
 
 func find_path():
 	reset()
@@ -275,8 +313,7 @@ func _draw():
 					break
 				draw_line(tiles[get_navigation(path[iter])].position, tiles[get_navigation(path[iter + 1])].position, Color.black)
 				iter += 1
-	
-	
+		
 func draw_circle_arc(center, radius, angle_from, angle_to, color):
 	var nb_points = 32
 	var points_arc = PoolVector2Array()
